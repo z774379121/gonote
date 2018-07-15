@@ -1,4 +1,3 @@
-
 //package main
 //
 //import (
@@ -47,6 +46,7 @@
 //	score <- newruner
 //}
 
+// context包
 //package main
 //
 //import (
@@ -111,16 +111,20 @@
 //	}
 //}
 package main
+
 import (
 	"fmt"
 	"gopkg.in/mgo.v2/bson"
 	"reflect"
+	"unsafe"
 )
+
 type Handler interface {
 	Do(k, v interface{})
 }
 
 type HandlerFunc func(k, v interface{})
+
 func (f HandlerFunc) Do(k, v interface{}) {
 	f(k, v)
 }
@@ -137,73 +141,131 @@ func EachFunc(m map[interface{}]interface{}, f func(k, v interface{})) {
 func selfInfo(k, v interface{}) {
 	fmt.Printf("大家好,我叫%s,今年%d岁\n", k, v)
 }
+
 func main() {
 	persons := make(map[interface{}]interface{})
 	persons["张三"] = 20
 	persons["李四"] = 23
 	persons["王五"] = 26
 	EachFunc(persons, selfInfo)
-	c := Coupons{bson.NewObjectId(), "test", 10}
-
+	c := Coupons{}
+	c.Name = "!"
+	c.Belongto = bson.NewObjectId()
+	c.Descrition = "!!"
+	c.Price = 10
+	fmt.Printf("%+v", c)
 	match := DoWork(&c, TranseMatch)
 	order := DoWork(&c, TranseOrder)
 	fmt.Println(match, order)
+	k := Additon{"@", bson.NewObjectId()}
+	testi(&k)
+	mi := Mi(20)
+	mi.Show()
+	ei := Easytype{2, 3}
+	fmt.Printf("%p", &ei)
+	getaddress(ei)
+	fmt.Println(ei)
+	kk := []Additon{
+		{"2", bson.NewObjectId()},
+		{"3", bson.NewObjectId()},
+		{"3", bson.NewObjectId()},
+		{"8", bson.NewObjectId()},
+		{"9", bson.NewObjectId()},
+		{"7", bson.NewObjectId()},
+	}
+	d := Slice(kk, reflect.TypeOf([]Additoni{}))
+	fmt.Println(kk)
+	fmt.Println(d.([]Additoni))
+
 }
 
 type Coupons struct {
 	Id_   bson.ObjectId `bson:"id_"`
 	Name  string        `bson:"name" json:"name"`
 	Price int           `bson:"price" json:"price"`
+	Additon
 }
+
+type Testpoint interface {
+	Do()
+	DoAgain()
+}
+
+func testi(testpoint Testpoint) {
+	fmt.Println("1")
+}
+
+//方法集为指针接受者，实现对象必须是指针对象
+// a:= Additon{} testi(a)报错
+// a:= &Additon{} testi(a)通过
+func (this *Additon) Do() {
+
+}
+
+func (this *Additon) DoAgain() {
+
+}
+
+//方法集的接受者为值时，实现对象可以是值对象也可以是指针对象
+
+//也就是说该对象为指针对象时可以实现 以指针和值为接受者的方法集接口
+//而值对象只能实现以值为接受者的方法集接口
+
+// a:= Additon{} testi(a)通过
+// a:= &Additon{} testi(a)通过
+
+//func (this Additon) Do()  {
 //
-//type MemberCard struct {
-//	Id_   bson.ObjectId `bson:"id_"`
-//	Name  string        `bson:"name"`
-//	Owner string        `bson:"owner"`
 //}
 //
-//type Transe interface {
-//	Do(input interface{}) bson.M
-//}
+//func (this Additon) DoAgain()  {
 //
-//func transefiled(input interface{}) bson.M{
-//	t := reflect.TypeOf(input).Elem()
-//	v := reflect.ValueOf(input).Elem()
-//	results := make(bson.M,10)
-//	for i:=0;i<t.NumField() ;i++  {
-//		results[t.Field(i).Tag.Get("bson")] = v.Field(i).Interface()
-//	}
-//	return results
-//}
-//
-//type hdfunc func(input interface{}) bson.M
-//
-//func (this *hdfunc) Do(input interface{}) bson.M {
-//	return
-//}
-//
-//func (this *Coupons) Do() bson.M {
-//	return transefiled(this)
-//}
-//func getmatchfield(transe Transe) bson.M {
-//	return transe.Do()
 //}
 
+// 强制切片类型转换
+type Additon struct {
+	Descrition string
+	Belongto   bson.ObjectId
+}
+
+type Additoni struct {
+	Descrition string
+	Belongto   bson.ObjectId
+}
+
+type Mi int
+
+func (this *Mi) Show() {
+	fmt.Println("show")
+}
+
+type Easytype struct {
+	I1 int
+	I2 int
+}
+
+func getaddress(easytype Easytype) {
+	easytype.I1 = 20
+	easytype.I2 = 30
+	fmt.Println(easytype)
+}
+
+// 面向接口编程
 type TranseSomething interface {
 	Transefiled(input interface{}) bson.M
 }
 
 type MyTranse func(input interface{}) bson.M
 
-func (this MyTranse) Transefiled(input interface{}) bson.M{
+func (this MyTranse) Transefiled(input interface{}) bson.M {
 	return this(input)
 }
 
-func TranseMatch(input interface{}) bson.M{
+func TranseMatch(input interface{}) bson.M {
 	t := reflect.TypeOf(input).Elem()
 	v := reflect.ValueOf(input).Elem()
-	results := make(bson.M,10)
-	for i:=0;i<t.NumField() ;i++  {
+	results := make(bson.M, 10)
+	for i := 0; i < t.NumField(); i++ {
 		if t.Field(i).Tag.Get("bson") != "" {
 			results[t.Field(i).Tag.Get("bson")] = v.Field(i).Interface()
 		}
@@ -212,11 +274,11 @@ func TranseMatch(input interface{}) bson.M{
 	return results
 }
 
-func TranseOrder(input interface{}) bson.M{
+func TranseOrder(input interface{}) bson.M {
 	t := reflect.TypeOf(input).Elem()
 	v := reflect.ValueOf(input).Elem()
-	results := make(bson.M,10)
-	for i:=0;i<t.NumField() ;i++  {
+	results := make(bson.M, 10)
+	for i := 0; i < t.NumField(); i++ {
 		if t.Field(i).Tag.Get("json") != "" {
 			results[t.Field(i).Tag.Get("json")] = v.Field(i).Interface()
 		}
@@ -224,13 +286,41 @@ func TranseOrder(input interface{}) bson.M{
 	return results
 }
 
-
-
-func RealDoWork(input interface{}, transe TranseSomething) bson.M{
+func RealDoWork(input interface{}, transe TranseSomething) bson.M {
 	return transe.Transefiled(input)
 }
 
-func DoWork(input interface{}, method func(input interface{}) bson.M) bson.M{
+func DoWork(input interface{}, method func(input interface{}) bson.M) bson.M {
 	return RealDoWork(input, MyTranse(method))
 }
 
+// 	----------------------------
+// 强制切片转换
+func Slice(slice interface{}, newSliceType reflect.Type) interface{} {
+	sv := reflect.ValueOf(slice)
+	if sv.Kind() != reflect.Slice {
+		panic(fmt.Sprintf("Slice called with non-slice value of type %T", slice))
+	}
+	if newSliceType.Kind() != reflect.Slice {
+		panic(fmt.Sprintf("Slice called with non-slice type of type %T", newSliceType))
+	}
+	newSlice := reflect.New(newSliceType)
+	hdr := (*reflect.SliceHeader)(unsafe.Pointer(newSlice.Pointer()))
+	hdr.Cap = sv.Cap() * int(sv.Type().Elem().Size()) / int(newSliceType.Elem().Size())
+	hdr.Len = sv.Len() * int(sv.Type().Elem().Size()) / int(newSliceType.Elem().Size())
+	hdr.Data = uintptr(sv.Pointer())
+	return newSlice.Elem().Interface()
+}
+
+//其他类型数组转换为[]byte切片
+func ByteSlice(slice interface{}) (data []byte) {
+	sv := reflect.ValueOf(slice)
+	if sv.Kind() != reflect.Slice {
+		panic(fmt.Sprintf("ByteSlice called with non-slice value of type %T", slice))
+	}
+	h := (*reflect.SliceHeader)((unsafe.Pointer(&data)))
+	h.Cap = sv.Cap() * int(sv.Type().Elem().Size())
+	h.Len = sv.Len() * int(sv.Type().Elem().Size())
+	h.Data = sv.Pointer()
+	return
+}
