@@ -38,13 +38,15 @@ Plug 'tell-k/vim-autopep8'
 
 Plug 'ervandew/supertab'
 Plug 'SirVer/ultisnips'
+Plug 'honza/vim-snippets'
+Plug 'dgryski/vim-godef'
 
 "代码折叠插件
 Plug 'tmhedberg/SimpylFold'
 
 "cpp补全
 " Plug 'Valloric/YouCompleteMe', { 'do': './install.py --clang-completer',  'for': ['c', 'cpp'] }
-Plug 'Valloric/YouCompleteMe', {'tag': 'e018777'}
+" Plug 'Valloric/YouCompleteMe', {'tag': 'e018777'}
 " 初始化
 call plug#end()
 
@@ -83,6 +85,8 @@ set list " 显示可见字符,避免被坑
 set listchars=tab:\~\ ,trail:.
 set expandtab "将tab转化为空格
 set showmatch " 显示括号配对情况
+set splitbelow " 分割出来的窗口位于当前窗口下边/右边
+set splitright
 
 set fenc=utf-8
 set encoding=utf-8
@@ -289,7 +293,7 @@ colorscheme gruvbox
 
 " FZ配置
 let g:fzf_layout = { 'down': '~35%' }
-nnoremap <C-F>      :Files<CR>
+" nnoremap <C-F>      :Files<CR>
 nnoremap <Leader>ff :Files<CR>
 nnoremap <Leader>fb :Buffers<CR>
 nnoremap <Leader>fc :Colors<CR>
