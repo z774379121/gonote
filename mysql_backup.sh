@@ -52,6 +52,8 @@
 
     $MYSQLDUMP -u $db_user -h $db_host -p $db_passwd -B $db_name -o "$backup_dir/backup.0/$time.$db_name"
     # 压缩
+    /usr/bin/tar -czf "$backup_dir/backup.0/$time.$db_name.tar.gz" -C "$backup_dir/backup.0" "$time.$db_name" --remove-files
+    /usr/bin/echo "备份"| mutt 774379121@qq.com -s "$time.$db_name" -a "$backup_dir/backup.0/$time.$db_name.tar.gz"
     # /usr/bin/tar -czvf "$backup_dir/backup.0/$time.$db_name.tar.gz" "$backup_dir/backup.0/$time.$db_name"
     # $RM -rf "$backup_dir/backup.0/$time.$db_name"
 
