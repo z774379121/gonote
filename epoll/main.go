@@ -47,7 +47,14 @@ func main() {
 
 				} else {
 					fmt.Println("message from: ", events[i].Fd)
-
+					rest := make([]byte, 1024)
+					n2, from, err := syscall.Recvfrom(int(events[i].Fd), rest, syscall.MSG_PEEK|syscall.MSG_DONTWAIT)
+					if err != nil {
+						fmt.Println(err)
+						return
+					}
+					fmt.Println(from, n2)
+					fmt.Println(rest[:n2])
 				}
 			}
 
